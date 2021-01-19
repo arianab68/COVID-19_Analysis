@@ -1,0 +1,158 @@
+COVID 19 Data Analysis
+
+Description: Ingest data from the latest New York Times' county-level COVID-19 database at https://github.com/nytimes/covid-19-data/blob/master/us-counties.csv, filter the data for a chosen county in a chosen state, calculate the daily count of new cases and new deaths, print the most recent 30 days' worth of data for the selected county. Perform EDA and show your findings through different plots and visualization techniques. 
+
+Task 1 : Environment Set up
+
+Task 2 : Data Collection
+
+Task 3 : Data Wrangling and EDA (Exploratory Data Analysis)
+
+Task 4: Understand NY Covid 19 data in last 30 days
+
+Task 5: Comparing Covid 19 data with different states
+
+Task 6: Conclusion
+
+
+
+Collaborated with: MJ and Tashi.
+
+Task 1: Environment Setup
+
+#Importing the necessary libraries for this analysis.
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+Task 2: Data Collection
+
+#Collecting the COVID-19 Dataset.
+
+data = pd.read_csv('https://github.com/nytimes/covid-19-data/raw/master/us-counties.csv')
+
+Task 3: Data Wrangling and EDA
+
+#Getting a basic idea of what is included within the dataset.
+
+data.head()
+
+#Expanding the dataset preview to 20 columns.
+
+data.head(20)
+
+#Extracting the null or unknown values within the 'fips' column by using the value counts function.
+
+data[data['fips'].isna()]['county'].value_counts()
+
+#Dropping the 'fips' column because it is not needed in our analysis.
+
+data = data.drop(['fips', ],axis=1)
+
+#Getting a view of the data without the 'fips' column.
+
+data.head()
+
+#Getting the generalized information about the dataset.
+
+data.info()
+
+#Getting the sum of all the null values.
+
+data.isna().sum()
+
+#Getting the count of the values within the 'deaths' column.
+
+data['deaths'].value_counts()
+
+#Extracting a generalized description of the dataset.
+
+data.describe()
+
+#Creating a seaborn histogram to get a visual picture of the values within the 'deaths' column.
+
+sns.set_style('whitegrid')
+data['deaths'].hist(bins=30)
+plt.xlabel('deaths')
+
+#Creating a seaborn jointplot to compare the number of cases for each state.
+
+sns.jointplot(x='state',y='cases', data=data)
+
+Task 4: Understand NY Covid 19 data in last 30 days
+
+#Obtaining the data 
+
+data = pd.read_csv('http://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv', index_col='date', parse_dates=True)
+
+#Creating a variable 'bool_mask' to filer New York as the state and New York City as the county
+
+bool_mask = (data['state'] == 'New York') & (data['county']== 'New York City')
+data_ny = data[bool_mask].copy()
+
+
+#Filtering the NY data to show the last 30 days
+
+data_ny = data_ny.loc['2020-dec-19':]
+
+#Getting a view of the New York City county data of COVID-19 cases within the past 30 days.
+
+data_ny.head(30)
+
+#Dropping the 'fips' column in the filtered New York dataset.
+
+data_ny = data_ny.drop(['fips', ],axis=1)
+
+#Getting a view of the New York dataset without the 'fips' column.
+
+data_ny.head(30)
+
+#Using these formulas to calculate the amount of new cases and new deaths within New York City within the past 30 days.
+
+data_ny['new_cases'] = data_ny['cases'] - data_ny['cases'].shift(1).fillna(0)
+data_ny['new_deaths'] = data_ny['deaths'] - data_ny['deaths'].shift(1).fillna(0)
+data_ny.head(30)
+
+#Plotting a lingplot showing the amount of new cases each day in New York within the past 30 days.
+
+plt.figure(figsize=(10,20))
+sns.lineplot(x = data_ny.index, y = data_ny['new_cases'], err_style=None)
+plt.xticks(rotation = 90);
+
+#Plotting a linplot to show the amount of new deaths each day in New York City within the past 30 days.
+
+plt.figure(figsize=(10,20))
+sns.lineplot(x = data_ny.index, y = data_ny['new_deaths'], err_style=None)
+plt.xticks(rotation = 90);
+
+Task 5: Comparing Covid 19 data with different states
+
+#Creating my list of states that I want to look at.
+
+states = ['New York', 'California', 'Texas', 'Florida', 'Chicago']
+
+#Filtering the data for these states.
+
+bool_filter = (data['state'] == 'New York') | (data['state'] == 'California') | (data['state'] == 'Texas') | (data['state'] == 'Florida') | (data['state'] == 'Chicago')
+data = data[bool_filter]
+
+#Creating a lineplot to visualize the comparison of the amount of deaths within each of these states.
+
+plt.figure(figsize=(10,20))
+sns.lineplot(x = data.index, y=data['deaths'], hue = data['state'], err_style=None)
+plt.xticks(rotation = 90);
+
+#Creating a lineplot to visualize the comparison of the amount of cases within each of these states.
+
+plt.figure(figsize=(10,20))
+sns.lineplot(x = data.index, y=data['cases'], hue = data['state'], err_style=None)
+plt.xticks(rotation = 90);
+
+Task 6: Conclusion
+
+
+Through analyzing this COVID-19 dataset, something that I can conclude is that by filtering out the states by it's county was extremly helpful in narrowing down our analysis especially considering how large this dataset is.
+Furthermore, when analyzing specifically New York City's COVID-19 data, it was alarming and rather eyeopening to visualize the impact that COVID-19 had in NYC, especially in regards to the amount of 'deaths' caused by this virus. 
